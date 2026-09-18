@@ -42,55 +42,66 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct Widget Widget;
+typedef struct Widget Widget;  // struct Widget를 Widget이라는 이름으로 사용
 
-typedef struct {
-    void (*render)(Widget *self);
-    void (*on_event)(Widget *self, int code);
-} VTable;
+typedef struct 
+{
+    void (*render)(Widget *self);              // 위젯을 화면에 출력하는 포인터
+    void (*on_event)(Widget *self, int code);  // 위젯의 이벤트를 처리하는 포인터
 
-struct Widget {
-    const VTable *vtbl; 
-    int id;
-    int closed;
-    char label[24];
-};
+} VTable;  // 구조체
 
-#define MAX_WIDGETS 8
-typedef struct {
-    Widget *items[MAX_WIDGETS];
-    int count;
+struct Widget 
+{
+    const VTable *vtbl;  // 이 위젯이 사용할 VTable를 가리키는 포인터
+    int id;              
+    int closed;         
+    char label[24];      
+};  //; 사용이유?
+
+#define MAX_WIDGETS 8  // 화면에 저장할 수 있는 위젯의 최대 개수
+
+typedef struct 
+{
+    Widget *items[MAX_WIDGETS]; // 위젯들의 주소를 저장하는 배열
+    int count;                  // 현재 저장된 위젯의 개수
 } Screen;
 
 /* ── 위젯 종류별 동작 ─────────────────────────────────────────── */
-static void button_render(Widget *self) {
-    printf("  [Button #%d] \"%s\"\n", self->id, self->label);
-}
-static void label_render(Widget *self) {
-    printf("  Label #%d: %s\n", self->id, self->label);
-}
-static void dialog_render(Widget *self) {
-    printf("  <<Dialog #%d>> %s\n", self->id, self->label);
+
+static void button_render(Widget *self) 
+{
+    printf("  [Button #%d] \"%s\"\n", self->id, self->label);  // 버튼의 id, label 출력
 }
 
-static void widget_noop_event(Widget *self, int code) { (void)self; (void)code; }
+static void label_render(Widget *self) 
+{
+    printf("  Label #%d: %s\n", self->id, self->label);  // 라벨의 id, label 출력
+}
 
-/* 다이얼로그는 이벤트 코드 1(닫기)을 받으면 스스로 정리(파괴)된다 */
-static void dialog_on_event(Widget *self, int code);
+static void dialog_render(Widget *self) 
+{
+    printf("  <<Dialog #%d>> %s\n", self->id, self->label);  // 다이얼로그의 id, label 출력
+}
 
-static const VTable BUTTON_VT = { button_render, widget_noop_event };
-static const VTable LABEL_VT  = { label_render,  widget_noop_event };
-static const VTable DIALOG_VT = { dialog_render, dialog_on_event  };
+static void widget_noop_event(Widget *self, int code) { (void)self; (void)code; }  
 
-static Widget *widget_new(const VTable *vt, int id, const char *label) {
+
+static void dialog_on_event(Widget *self, int code);  // 다이얼로그의 이벤트 처리 함수 선언
+static const VTable BUTTON_VT = { button_render, widget_noop_event };  // 버튼이 사용할 함수 목록
+static const VTable LABEL_VT  = { label_render,  widget_noop_event };  // 라벨이 사용할 함수 목록
+static const VTable DIALOG_VT = { dialog_render, dialog_on_event };   // 다이얼로그가 사용할 함수 목록
+static Widget *widget_new(const VTable *vt, int id, const char *label) {  // 새로운 Widget을 만드는 함수
 
     /* [Thinking Point]
-    *   w 에 아직 아무 값도 넣지 않았는데, sizeof *w 로 *w 를 써도 괜찮은 이유는?
+    *   Q. w 에 아직 아무 값도 넣지 않았는데, sizeof *w 로 *w 를 써도 괜찮은 이유는?
+    *       A. sizeof 연산자가 컴파일 타임에 피연산자의 '타입'만 확인하고, 실제 메모리에 접근하는 표현식을 실행(평가)하지 않기 때문
     *   tip 1. sizeof 는 피연산자를 '실행(역참조)'하지 않고 '타입'만 본다.
     *          → *w 의 타입(Widget)만 필요할 뿐, w 를 실제로 따라가지 않는다.
     *   tip 2. 그래서 sizeof *w 는 (VLA 제외) 컴파일 타임에 sizeof(Widget) 상수로 치환된다.
     *   생각해보기: sizeof(Widget) 대신 sizeof *w 로 쓰면 어떤 장점이 있을까?
     */
+   
     Widget *w = malloc(sizeof *w);
     if (!w) { perror("malloc"); exit(1); }
     w->vtbl = vt;
@@ -118,8 +129,8 @@ static void screen_dispatch(Screen *s, int code) {
 }
 
 static void screen_render(Screen *s) {
-    for (int i = 0; i < s->count; i++) {    
-        Widget *w = s->items[i];            
+    for (int i = 0; i < s->count; i++) {
+        Widget *w = s->items[i];
         w->vtbl->render(w);      
     }
 }
