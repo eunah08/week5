@@ -113,21 +113,24 @@ static void screen_add(Screen *s, Widget *w) {
 static void screen_dispatch(Screen *s, int code) {
     for (int i = 0; i < s->count; i++) {
         Widget *w = s->items[i];
+        if (w == NULL)
+            continue;         
         w->vtbl->on_event(w, code);
     }
 }
 
 static void screen_render(Screen *s) {
     for (int i = 0; i < s->count; i++) {    
-        Widget *w = s->items[i];            
+        Widget *w = s->items[i];
+        if (w == NULL)
+            continue; 
         w->vtbl->render(w);      
     }
 }
 
 static void dialog_on_event(Widget *self, int code) {
     if (code == 1) {
-        self->closed = 1;
-        widget_destroy(self);   
+        self->closed = 1;   
     }
 }
 
@@ -135,11 +138,11 @@ static char *app_build_status(const char *text) {
     char *msg = malloc(sizeof(Widget));   
     if (!msg) exit(1);
 
-    /* [테스트용 연출] 재사용한 메모리를 0xAB 로 '일부러' 덮어써서 오염시킨다.
-     * 실무라면 다른 기능이 우연히 이 자리를 덮어쓰겠지만, 여기서는 UAF 크래시를
-     * 매번 똑같이(결정적으로) 재현하기 위해 인위적으로 채운다. 
-     * glibc(리눅스) 환경 (tcache)에서만 유효하다. 환경&상황에 따라 msg는 새로운 주소로 할당될 수 있다.
-     */
+    //  [테스트용 연출] 재사용한 메모리를 0xAB 로 '일부러' 덮어써서 오염시킨다.
+    //   실무라면 다른 기능이 우연히 이 자리를 덮어쓰겠지만, 여기서는 UAF 크래시를
+    //   매번 똑같이(결정적으로) 재현하기 위해 인위적으로 채운다. 
+    //  glibc(리눅스) 환경 (tcache)에서만 유효하다. 환경&상황에 따라 msg는 새로운 주소로 할당될 수 있다.
+    
     memset(msg, 0xAB, sizeof(Widget));
     snprintf(msg, sizeof(Widget), "STATUS: %s", text);
     return msg;
@@ -158,6 +161,12 @@ int main(void) {
     screen_dispatch(&s, 1);
 
     /* TODO 닫힌(closed) 위젯을 여기서 정리(free + 해당 슬롯 NULL)할 필요가 있음 */
+    for (int i = 0; i < s.count; i++) {
+        if (s.items[i] != NULL && s.items[i]->closed) {
+            free(s.items[i]);
+            s.items[i] = NULL;
+        }
+    }
 
     char *status = app_build_status("dialog closed");
     printf("%s\n", status);
