@@ -73,7 +73,7 @@ static void dialog_render(Widget *self) {
     printf("  <<Dialog #%d>> %s\n", self->id, self->label);
 }
 
-static void widget_noop_event(Widget *self, int code) { (void)self; (void)code; }
+static void widget_noop_event(Widget *self, int code) { (void)self; (void)code; }    
 
 /* 다이얼로그는 이벤트 코드 1(닫기)을 받으면 스스로 정리(파괴)된다 */
 static void dialog_on_event(Widget *self, int code);
