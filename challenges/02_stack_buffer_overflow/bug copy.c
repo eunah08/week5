@@ -30,7 +30,7 @@
  *   행 루프가 `i <= ROWS` 로 도는 바람에 행이 하나 더 생성된다.
  *   그 행의 인덱스는 idx = SIZE + j 가 되어 스택 배열의 끝을 넘어 쓴다.
  *   스택 카나리(스매싱 보호)가 훼손되어 main 반환 시 "stack smashing detected"
- *   로 SIGABRT. 삼각 인덱싱 산술에 가려 off-by-one 이 눈에 잘 안 띈다.
+ *   로 SIGABRT. 삼각 인덱싱 산술에 가려 off-by-one 이 눈에 잘 띄지 않는다.
  *
  * [gdb 로 잡기]
  *   make gdb NAME=02_stack_buffer_overflow
@@ -50,53 +50,54 @@
  *       인덱싱 산술을 쓸 때는 "마지막으로 접근하는 인덱스"를 손으로 계산해
  *       배열 크기와 반드시 비교하세요.
  */
-#include <stdio.h>
-#include <stdlib.h>
+#include <stdio.h>                         // 표준 입출력 함수를 사용하기 위한 헤더
+#include <stdlib.h>                        // 표준 라이브러리 함수를 사용하기 위한 헤더
 
-#define ROWS 14
-enum { SIZE = ROWS * (ROWS + 1) / 2 };   /* 0..ROWS-1 행을 담는 정확한 크기 */
+#define ROWS 14                             // ROWS의 값은 14
+enum { SIZE = ROWS * (ROWS + 1) / 2 };     // 0부터 ROWS-1행까지 저장할 수 있는 배열의 전체 크기
 
 /* 행 i, 열 j 의 삼각 인덱스 */
-static int tri_index(int i, int j) {
-    return i * (i + 1) / 2 + j;
+static int tri_index(int i, int j) {       // 정적 함수 tri_index, 정수형 매개변수 i와 j를 가짐
+    return i * (i + 1) / 2 + j;            // 계산한 정수 값을 반환
 }
 
 /* 파스칼의 삼각형을 tri[] 에 채운다. */
-static void build_pascal(int *tri, int rows) {
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j <= i; j++) {
-            int idx = tri_index(i, j);
-            if (j == 0 || j == i) {
-                tri[idx] = 1;                         /* 양 끝은 1 */
-            } else {
-                int up_left  = tri_index(i - 1, j - 1);
-                int up_right = tri_index(i - 1, j);
-                tri[idx] = tri[up_left] + tri[up_right];
+static void build_pascal(int *tri, int rows) {  // 정적 함수 build_pascal, 정수형 포인터 tri와 정수형 rows를 매개변수로 가짐
+    for (int i = 0; i < rows; i++) {           // i를 0으로 시작하고, i가 rows보다 작을 때까지 1씩 증가
+        for (int j = 0; j <= i; j++) {          // j를 0으로 시작하고, j가 i보다 작거나 같을 때까지 1씩 증가
+            int idx = tri_index(i, j);          // 정수형 변수 idx에 tri_index 함수의 반환값을 저장
+            if (j == 0 || j == i) {             // j가 0이거나 j가 i와 같다면
+                tri[idx] = 1;                   // tri의 idx 위치에 1을 저장
+            } else {                             // 아니라면
+                int up_left  = tri_index(i - 1, j - 1);     // up_left에 tri_index 함수의 반환값을 저장
+                int up_right = tri_index(i - 1, j);         // up_right에 tri_index 함수의 반환값을 저장
+                tri[idx] = tri[up_left] + tri[up_right];    // tri의 idx 위치에 tri[up_left]와 tri[up_right]의 합을 저장
             }
         }
     }
 }
 
-static long row_sum(const int *tri, int i) {
-    long sum = 0;
-    for (int j = 0; j <= i; j++) sum += tri[tri_index(i, j)];
-    return sum;
+static long row_sum(const int *tri, int i) {    
+    long sum = 0;                               
+    for (int j = 0; j <= i; j++) sum += tri[tri_index(i, j)];  
+    return sum;                             
 }
 
 static void print_row(const int *tri, int i) {
-    printf("row %2d:", i);
-    for (int j = 0; j <= i; j++) printf(" %d", tri[tri_index(i, j)]);
-    printf("   (sum=%ld)\n", row_sum(tri, i));
+    printf("row %2d:", i);                    
+    for (int j = 0; j <= i; j++)   printf(" %d", tri[tri_index(i, j)]);          
+    printf("   (sum=%ld)\n", row_sum(tri, i)); 
 }
 
-int main(void) {
-    int tri[SIZE];
+int main(void) {                               
+    int tri[SIZE];                           
 
-    build_pascal(tri, ROWS);          
+    build_pascal(tri, ROWS);                   
 
-    for (int i = 0; i < ROWS; i++) print_row(tri, i);
+    for (int i = 0; i < ROWS; i++)              
+        print_row(tri, i);                  
 
-    printf("SIZE = %d\n", SIZE);
+    printf("SIZE = %d\n", SIZE);        
 
     /* [Thinking Point]
      * 이 프로그램은 위 printf 까지 정상 출력을 마치고도, 왜 하필 이 return 0; 에서
@@ -108,5 +109,5 @@ int main(void) {
      *   생각해보기: build_pascal 이 tri[] 경계를 넘어 쓰면 카나리가 훼손된다. 그렇다면
      *               크래시가 "배열을 넘어 쓰는 순간"이 아니라 "return 시점"에 나는 이유는?
      *               (힌트: 오버플로 자체는 조용히 일어나고, 검사는 return 직전에 이뤄진다) */
-    return 0;
+    return 0;                                   // main 함수를 종료하고 0을 반환
 }

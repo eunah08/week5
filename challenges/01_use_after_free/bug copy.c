@@ -42,12 +42,12 @@
 #include <stdlib.h>     // - malloc, free, exit 사용
 #include <string.h>     // - strncpy, memset 같은 문자열 관련 함수 사용
 
-typedef struct Widget Widget;    // - Widget 구조체를 아래에서 정의하기 전에 이름만 먼저 만들어둠
+typedef struct Widget Widget;    // - Widget 구조체를 정의하기 전 이름
 
 typedef struct {
     void (*render)(Widget *self);                  // - 위젯을 화면에 그리는 함수의 주소를 저장
     void (*on_event)(Widget *self, int code);      // - 위젯이 이벤트를 처리하는 함수의 주소를 저장
-} VTable;                                           // - 위젯이 사용할 함수들의 주소를 모아둔 구조체
+} VTable;                                           // - 구조체
 
 struct Widget {
     const VTable *vtbl;     // - 어떤 종류의 위젯인지에 맞는 함수 주소들을 가리킴
@@ -113,8 +113,8 @@ static void screen_add(Screen *s, Widget *w) {     // - Screen 에 새로운 위
 static void screen_dispatch(Screen *s, int code) {     // - Screen 안의 모든 위젯에게 이벤트를 전달
     for (int i = 0; i < s->count; i++) {               // - 저장된 위젯 개수만큼 반복
         Widget *w = s->items[i];                       // - 현재 배열 위치의 위젯 주소를 w에 저장
-        if (w == NULL)                                 // - 현재 슬롯에 위젯이 없으면
-            continue;                                 // - 다음 위젯으로 넘어감
+        if (w == NULL)                           
+            continue;                              
         w->vtbl->on_event(w, code);                    // - 현재 위젯의 이벤트 처리 함수를 호출
     }
 }
@@ -122,8 +122,8 @@ static void screen_dispatch(Screen *s, int code) {     // - Screen 안의 모든
 static void screen_render(Screen *s) {                // - Screen 안의 모든 위젯을 화면에 그리는 함수
     for (int i = 0; i < s->count; i++) {               // - 저장된 위젯 개수만큼 반복
         Widget *w = s->items[i];                       // - 현재 배열 위치의 위젯 주소를 w에 저장
-        if (w == NULL)                                 // - 현재 슬롯에 위젯이 없으면
-            continue;                                 // - 다음 위젯으로 넘어감
+        if (w == NULL)                               
+            continue;                               
         w->vtbl->render(w);                            // - 현재 위젯의 render 함수를 호출해서 화면에 그림
     }
 }
@@ -161,10 +161,10 @@ int main(void) {                                        // - 프로그램이 시
     screen_dispatch(&s, 1);                               // - 모든 위젯에게 닫기 이벤트 코드 1을 전달
 
     /* TODO 닫힌(closed) 위젯을 여기서 정리(free + 해당 슬롯 NULL)할 필요가 있음 */
-    for (int i = 0; i < s.count; i++) {                   // - Screen에 들어있는 위젯을 처음부터 끝까지 확인
-        if (s.items[i] != NULL && s.items[i]->closed) {   // - 위젯이 존재하고 닫힌 상태인지 확인
-            free(s.items[i]);                              // - 닫힌 위젯이 사용하던 힙 메모리를 해제
-            s.items[i] = NULL;                             // - 해제한 위젯의 포인터를 NULL로 바꿔서 더 이상 사용하지 않게 함
+    for (int i = 0; i < s.count; i++) {                  
+        if (s.items[i] != NULL && s.items[i]->closed) {   
+            free(s.items[i]);                              
+            s.items[i] = NULL;                        
         }
     }
 
