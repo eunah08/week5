@@ -53,10 +53,10 @@ typedef struct {
 } IntList;
 
 static void list_init(IntList *l) {
-    l->cap  = 8;
-    l->len  = 0;
-    l->data = malloc(l->cap * sizeof(int));
-    if (!l->data) { perror("malloc"); exit(1); }
+    l->cap  = 8;                              // 배열의 최대 저장 공간을 8칸으로 설정
+    l->len  = 0;                              // 현재 저장된 데이터 개수를 0으로 설정
+    l->data = malloc(l->cap * sizeof(int));   // 정수 8개를 저장할 메모리 공간을 동적 할당
+    if (!l->data) { perror("malloc"); exit(1); }  // 만약 l->data가 NULL이라면 오류 출력, 프로그램 종료
 }
 
 static void list_ensure(IntList *l, size_t need) {
