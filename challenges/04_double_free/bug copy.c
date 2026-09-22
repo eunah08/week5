@@ -105,7 +105,7 @@ static void directory_free(Directory *d) {
         free(d->by_id[i]);                 
     }
     for (int i = 0; i < d->count; i++) {
-        free(d->by_name[i]);               
+        free(d->by_name[i]);        //free없애기             
     }
     d->count = 0;
 }
