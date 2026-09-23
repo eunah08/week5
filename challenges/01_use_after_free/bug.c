@@ -113,17 +113,17 @@ static void screen_add(Screen *s, Widget *w) {
 static void screen_dispatch(Screen *s, int code) {
     for (int i = 0; i < s->count; i++) {
         Widget *w = s->items[i];
-        if (w == NULL)
-            continue;         
+        if (w == NULL) 
+            continue;  
         w->vtbl->on_event(w, code);
     }
 }
 
-static void screen_render(Screen *s) {
+static void screen_render(Screen *s) {  
     for (int i = 0; i < s->count; i++) {    
         Widget *w = s->items[i];
-        if (w == NULL)
-            continue; 
+        if (w == NULL) 
+            continue;  
         w->vtbl->render(w);      
     }
 }
@@ -167,6 +167,7 @@ int main(void) {
             s.items[i] = NULL;
         }
     }
+
 
     char *status = app_build_status("dialog closed");
     printf("%s\n", status);

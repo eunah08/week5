@@ -64,8 +64,8 @@ static void expand(const Config *c, const char *tmpl, char *out, size_t outcap) 
             memcpy(key, p + 2, kl);
             key[kl] = '\0';
 
-            const char *v = cfg_get(c, key);  
-            //if (v == NULL) v = "";    
+            const char *v = cfg_get(c, key);      
+            //여기에 조건부 추가  반환값을 검사하는 부분
             size_t vl = strlen(v);                 
             if (o + vl < outcap) { memcpy(out + o, v, vl); o += vl; }
             p = end + 1;
