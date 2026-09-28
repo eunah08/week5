@@ -43,7 +43,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct {
+typedef struct {    //하지만 두 인덱스는 같은*   Rec 객체들을 공유하므로, 
     int   id;
     char *name;      
 } Rec;
@@ -101,8 +101,8 @@ static void directory_dump(Directory *d) {
 
 static void directory_free(Directory *d) {
     for (int i = 0; i < d->count; i++) {
-        free(d->by_id[i]->name);
-        free(d->by_id[i]);                 
+        free(d->by_id[i]->name);    // 정리 함수가 "두 인덱스를 각각 순회하며 free" 한다
+        free(d->by_id[i]);          //by_id 로 한 번, by_name 으로 또 한 번 → 같은 포인터를 *   두 번 free. glibc 가 "double free or corruption" 으로 SIGABRT.
     }
     // for (int i = 0; i < d->count; i++) {
     //     free(d->by_name[i]);               

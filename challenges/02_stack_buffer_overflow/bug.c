@@ -55,7 +55,7 @@
 
 #define ROWS 14
 enum { SIZE = ROWS * (ROWS + 1) / 2 };   /* 0..ROWS-1 행을 담는 정확한 크기 */
-
+                                        // ROWS 행의 개수
 /* 행 i, 열 j 의 삼각 인덱스 */
 static int tri_index(int i, int j) {
     return i * (i + 1) / 2 + j;
