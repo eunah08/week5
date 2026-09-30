@@ -66,7 +66,7 @@ int main(void) {
     char raw[] =
         "Host: example.com\n"
         "Accept: */*\n"
-        "Connection: \n"                     
+        "Connection\n"                     
         "User-Agent: memdbg-cli\n";
 
     Headers h = { .count = 0 };
